@@ -25,10 +25,9 @@ public class UserPointService {
         if (userId == null || amount == null) {
             throw new IllegalArgumentException("ID 및 충전포인트를 입력해주세요.");
         }
-        if (amount < 1000) {
-            throw new IllegalArgumentException("충전포인트는  1000원이상 충전할 수 있습니다.");
-        }
+
         UserPoint userPoint = userPointTable.selectById(userId);
+
         userPointTable.insertOrUpdate(userPoint.id(), userPoint.point());
         pointHistoryTable.insert(userPoint.id(), userPoint.point(), TransactionType.CHARGE, System.currentTimeMillis());
 
@@ -40,9 +39,7 @@ public class UserPointService {
         if (userId == null || amount == null) {
             throw new IllegalArgumentException("ID 및 충전포인트를 입력해주세요.");
         }
-        if (amount < 0) {
-            throw new IllegalArgumentException("충전포인트는 1원 이상부터 사용할 수 있습니다.");
-        }
+
         UserPoint userPoint = userPointTable.selectById(userId);
         if (userPoint.point() < amount) {
             throw new IllegalArgumentException("포인트 잔액이 부족합니다.");
