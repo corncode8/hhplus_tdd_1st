@@ -14,38 +14,30 @@ public class UserPointService {
 
     // 포인트 조회
     public UserPoint getUserPoint(Long userId) throws InterruptedException {
-        if (userId == null) {
-            throw new IllegalArgumentException("ID를 입력해주세요");
-        }
+
         return userPointTable.selectById(userId);
     }
 
     // 포인트 충전
-    public UserPoint chargePoint(Long userId, Long amount) throws InterruptedException {
-        if (userId == null || amount == null) {
-            throw new IllegalArgumentException("ID 및 충전포인트를 입력해주세요.");
-        }
+    public PointHistory chargePoint(Long userId, Long amount) throws InterruptedException {
 
         UserPoint userPoint = userPointTable.selectById(userId);
+        UserPoint updateUser = userPointTable.insertOrUpdate(userPoint.id(), amount + userPoint.point());
 
-        userPointTable.insertOrUpdate(userPoint.id(), userPoint.point());
-        pointHistoryTable.insert(userPoint.id(), userPoint.point(), TransactionType.CHARGE, System.currentTimeMillis());
+        return pointHistoryTable.insert(updateUser.id(), updateUser.point(), TransactionType.CHARGE, System.currentTimeMillis());
 
-        return userPoint;
     }
 
     // 포인트 사용
     public UserPoint usePoint(Long userId, Long amount) throws InterruptedException {
-        if (userId == null || amount == null) {
-            throw new IllegalArgumentException("ID 및 충전포인트를 입력해주세요.");
-        }
 
         UserPoint userPoint = userPointTable.selectById(userId);
         if (userPoint.point() < amount) {
             throw new IllegalArgumentException("포인트 잔액이 부족합니다.");
         }
-        amount -= userPoint.point();
-        return userPointTable.insertOrUpdate(userId, amount);
+
+        return userPointTable.insertOrUpdate(userId, amount - userPoint.point());
+
     }
 
 

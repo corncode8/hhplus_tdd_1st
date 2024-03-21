@@ -14,11 +14,8 @@ public class PointHistoryService {
 
     // 포인트 내역 조회
     public List<PointHistory> getPointHistory(Long userId) {
-        List<PointHistory> pointHistories = pointHistoryTable.selectAllByUserId(userId);
 
-        if (userId == null) {
-            throw new IllegalArgumentException("ID를 입력해주세요");
-        }
-        return pointHistories;
+        return pointHistoryTable.selectAllByUserId(userId);
+
     }
 }

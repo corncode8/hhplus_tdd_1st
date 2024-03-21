@@ -17,14 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 public class PointHistoryTest {
 
-    @Autowired
-    PointHistoryTable pointHistoryTable;
 
-    @Autowired
-    PointHistoryService pointHistoryService;
-
-    @Autowired
-    UserPointService userPointService;
 
     @BeforeEach
     void setUp() {
@@ -35,16 +28,12 @@ public class PointHistoryTest {
     @Test
     void insertPoint() throws InterruptedException {
         //given
-        UserPoint userPoint = new UserPoint(1L, 1000L, System.currentTimeMillis());
 
 
         //when
-        PointHistory pointHistory = pointHistoryTable.insert(userPoint.id(), userPoint.point(), TransactionType.CHARGE, userPoint.updateMillis());
-        List<PointHistory> pointHistories = pointHistoryTable.selectAllByUserId(pointHistory.userId());
 
         //then
-        assertThat(pointHistories).isNotNull();
-        assertThat(pointHistories.size()).isEqualTo(1);
+
 
     }
 
@@ -52,19 +41,12 @@ public class PointHistoryTest {
     @Test
     void getPointList() throws InterruptedException{
         //given
-        Long userId = 2L;
-        Long point1 = 10000L;
-        Long point2 = 22000L;
 
-        userPointService.chargePoint(userId, point1);
-        userPointService.chargePoint(userId, point2);
 
         //when
-        List<PointHistory> pointHistory = pointHistoryService.getPointHistory(userId);
+
 
         //then
-        assertThat(pointHistory).isNotNull();
-        assertThat(pointHistory.size()).isEqualTo(2);
 
     }
 

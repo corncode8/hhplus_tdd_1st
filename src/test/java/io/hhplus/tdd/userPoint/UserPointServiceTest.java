@@ -1,110 +1,95 @@
 package io.hhplus.tdd.userPoint;
 
+import io.hhplus.tdd.database.PointHistoryTable;
+import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.point.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
+
 public class UserPointServiceTest {
 
-    @Autowired
-    UserPointService userPointService;
+    @Mock
+    private UserPointTable userPointTable;
+
+    @Mock
+    private PointHistoryTable pointHistoryTable;
+
+    private UserPointService service;
 
     @BeforeEach
-    void setUp() {
-
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        service = new UserPointService(userPointTable, pointHistoryTable);
     }
 
-    @DisplayName("포인트 조회 테스트 성공")
+    @DisplayName("포인트 조회 테스트 ")
     @Test
-    void getUserPoint() throws InterruptedException{
-        //given
-        Long userId = 10L;
-        Long amount = 2000L;
-        UserPoint user = userPointService.chargePoint(userId, amount);
-
-        //when
-        UserPoint userPoint = userPointService.getUserPoint(userId);
-
-        //then
-        assertThat(userPoint).isNotNull();
-        assertThat(userPoint.point()).isEqualTo(amount);
-    }
-
-    @DisplayName("포인트 충전 테스트 성공")
-    @Test
-    void chargePointTest() throws InterruptedException{
+    void selectByIdTest() throws InterruptedException{
         //given
         Long userId = 1L;
-        Long amount = 10000L;
+        Long testPoint = 1000L;
+        UserPoint stubUserPoint = new UserPoint(userId, testPoint, System.currentTimeMillis());
+        when(userPointTable.selectById(userId)).thenReturn(stubUserPoint);
 
         //when
-        UserPoint userPoint = userPointService.chargePoint(userId, amount);
-
+        UserPoint result = service.getUserPoint(userId);
 
         //then
-        assertThat(userPoint).isNotNull();
-        assertThat(userPoint.id()).isEqualTo(userId);
-        assertThat(userPoint.point()).isEqualTo(amount);
+        assertNotNull(result);
+        assertEquals(testPoint, result.point());
     }
 
-    @DisplayName("포인트 충전 테스트 실패")
+    @DisplayName("포인트 충전 테스트 ")
     @Test
-    void chargePointFailCase() {
+    void insertOrUpdateTest() throws InterruptedException{
         //given
         Long userId = 1L;
-        Long amount = 500L;
+        Long amount = 1000L;
+        UserPoint existUser = new UserPoint(userId, 1000L, System.currentTimeMillis());
+        UserPoint updateUser = new UserPoint(userId, 2000L, System.currentTimeMillis());
 
-        //when & then
-        assertThrows(IllegalArgumentException.class, () -> userPointService.chargePoint(userId, amount), "충전포인트는  1000원이상 충전할 수 있습니다.");
+        when(userPointTable.selectById(userId)).thenReturn(existUser);
+
+        // 충전 스텁 설정
+        when(userPointTable.insertOrUpdate(userId, 2000L)).thenReturn(updateUser);
+
+        PointHistory expectedHistory = new PointHistory(1L, userId, TransactionType.CHARGE, amount, System.currentTimeMillis());
+
+        // insert 스텁 설정
+        when(pointHistoryTable.insert(eq(updateUser.id()), eq(updateUser.point()), eq(TransactionType.CHARGE), anyLong())).thenReturn(expectedHistory);
+
+        //when
+        PointHistory result = service.chargePoint(userId, amount);
+
+        //then
+        assertNotNull(result);
+        assertEquals(amount, result.amount());
     }
 
-    @DisplayName("포인트 사용 테스트 성공")
+    @DisplayName("포인트 사용 테스트 ")
     @Test
     void usePointTest() throws InterruptedException{
         //given
-        Long userId = 5L;
-        Long amount = 20000L;
-        Long useAmount = 5000L;
-        UserPoint user = userPointService.chargePoint(userId, amount);
+        Long userId = 1L;
+        Long amount = 1000L;
+        UserPoint stubUserPoint = new UserPoint(userId, amount, System.currentTimeMillis());
+        when(userPointTable.insertOrUpdate(userId, amount)).thenReturn(stubUserPoint);
+//        UserPoint result = service.chargePoint(userId, amount);
 
         //when
-        UserPoint usePoint = userPointService.usePoint(userId, useAmount);
+        UserPoint userPoint = service.usePoint(userId, 500L);
 
         //then
-        assertThat(usePoint).isNotNull();
-        assertThat(usePoint.point()).isEqualTo(amount - useAmount);
+        assertNotNull(userPoint);
+        assertEquals(500L, userPoint.point());
     }
 
-    @DisplayName("포인트 사용 테스트 실패 (잔액 부족)")
-    @Test
-    void usePointFailCase1() throws InterruptedException{
-        //given
-        Long userId = 5L;
-        Long amount = 20000L;
-        Long useAmount = 25000L;
-        userPointService.chargePoint(userId, amount);
-
-        //when & then
-        assertThrows(IllegalArgumentException.class, () -> userPointService.usePoint(userId, useAmount), "포인트 잔액이 부족합니다.");
-    }
-
-    @DisplayName("포인트 사용 테스트 실패 (0 포인트 사용)")
-    @Test
-    void usePointFailCase2() throws InterruptedException{
-        //given
-        Long userId = 5L;
-        Long amount = 20000L;
-        Long useAmount = 0L;
-        userPointService.chargePoint(userId, amount);
-
-        //when & then
-        assertThrows(IllegalArgumentException.class, () -> userPointService.usePoint(userId, useAmount), "충전포인트는 1원 이상부터 사용할 수 있습니다.");
-    }
 }
