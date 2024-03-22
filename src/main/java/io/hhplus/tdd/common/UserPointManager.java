@@ -1,6 +1,7 @@
 package io.hhplus.tdd.common;
 
 import io.hhplus.tdd.point.PointHistory;
+import io.hhplus.tdd.point.TransactionType;
 import io.hhplus.tdd.point.UserPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,13 @@ public class UserPointManager {
 
     // 포인트 충전
     public UserPoint charge(Long userId, Long amount) throws InterruptedException{
+        if (amount < 0) {
+            throw new RuntimeException("0원이상 충전할 수 있습니다.");
+        }
+
         UserPoint userPoint = userPointReader.read(userId);
+
+        userHistoryReader.save(userId, userPoint.point() + amount, TransactionType.CHARGE, System.currentTimeMillis());
         return userPointWriter.modify(userId, userPoint.point() + amount);
     }
 
@@ -32,6 +39,7 @@ public class UserPointManager {
         if (userPoint.point() - amount < 0) {
             throw  new RuntimeException("포인트가 부족합니다.");
         }
+        userHistoryReader.save(userId, userPoint.point() - amount, TransactionType.USE, System.currentTimeMillis());
         return userPointWriter.modify(userId, userPoint.point() - amount);
     }
 

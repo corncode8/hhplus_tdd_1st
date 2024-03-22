@@ -1,6 +1,5 @@
 package io.hhplus.tdd.common;
 
-import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 import io.hhplus.tdd.point.UserPoint;
 import lombok.RequiredArgsConstructor;
