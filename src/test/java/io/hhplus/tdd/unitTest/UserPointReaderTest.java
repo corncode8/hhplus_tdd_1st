@@ -2,18 +2,23 @@ package io.hhplus.tdd.unitTest;
 
 import io.hhplus.tdd.common.UserPointReader;
 import io.hhplus.tdd.database.UserPointTable;
+import io.hhplus.tdd.point.PointHistory;
+import io.hhplus.tdd.point.TransactionType;
 import io.hhplus.tdd.point.UserPoint;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class UserPointReaderTest {
 
     @Mock
@@ -25,19 +30,6 @@ public class UserPointReaderTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-    }
-
-    @DisplayName("save 테스트")
-    @Test
-    void saveTest() {
-        //given
-        Long userId = 1L;
-        UserPoint user = new UserPoint(userId, 500L, System.currentTimeMillis());
-
-
-        //when
-
-        //then
     }
 
     @DisplayName("read 테스트")
