@@ -2,8 +2,6 @@ package io.hhplus.tdd.service;
 
 import io.hhplus.tdd.common.LockHandler;
 import io.hhplus.tdd.common.UserPointManager;
-import io.hhplus.tdd.common.UserPointReader;
-import io.hhplus.tdd.common.UserPointWriter;
 import io.hhplus.tdd.point.PointHistory;
 import io.hhplus.tdd.point.UserPoint;
 import lombok.RequiredArgsConstructor;
@@ -50,5 +48,6 @@ public class UserPointService {
     public List<PointHistory> readList(Long userId) {
         return userPointManager.readList(userId);
     }
+
 
 }

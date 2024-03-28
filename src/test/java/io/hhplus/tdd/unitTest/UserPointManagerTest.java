@@ -60,7 +60,7 @@ public class UserPointManagerTest {
 
     }
 
-    @DisplayName("테스트")
+    @DisplayName("충전 테스트")
     @Test
     void chargeTest() throws InterruptedException{
         //given
